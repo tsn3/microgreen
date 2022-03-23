@@ -1,0 +1,321 @@
+<div class="sidebar-left{% if section.settings.sidebar_enable %} enabel{% endif %}">
+	{% if current_tags %}
+		<div class="sidebar_widget">
+		<p>
+			{% if collection %}
+				<a href="/collections/{{collection.handle}}"><i class="fa fa-trash" aria-hidden="true"></i> {{ 'collections.filters.clear' | t }}</a>
+			{% else %}
+				<a href="/collections/all"><i class="fa fa-trash" aria-hidden="true"></i> {{ 'collections.filters.clear' | t }}</a>
+			{% endif %}
+		</p>
+		<div class="checkbox-title">{{ 'collections.filters.selected' | t }}</div>
+		{% for tag in collection.all_tags %}
+			{% if current_tags contains tag %}
+				<li class="category-filter"><span class="category-filter checkbox-title">{{ tag }}</span>
+					{{ "x" | link_to_remove_tag: tag }}
+				</li>
+			{% endif %}
+		{% endfor %}
+		</div>
+	{% endif %}
+	{% if section.settings.show_sidebar_title %}
+		<div class="block-title text-center sidebar-title">{{ 'collections.filters.title_tags' | t }}</div>
+	{% endif %}
+	{% for block in section.blocks %}
+		{% case block.type %}
+
+			{% when 'widget_collection' %}
+				<div class="sidebar_widget">
+					<div class="widget_header block-title">{{ block.settings.title | escape }}<i class="side_trigger" data-subside="side_{{ block.id }}"></i></div>
+					<div class="widget_content" id="side_{{ block.id }}">
+						<ul class="list_categories">
+							{% for collection in collections %}
+								{% if collection.products_count != 0 %}
+									{% assign products_count = 0 %}
+									{% for product in collection.products %}
+										{% assign products_count = products_count | plus: 1 %}
+									{% endfor %}
+									<li class="filter__item {% if link_count > 0 %}with_ul{% endif %}">
+										<label class="checkbox-category">
+											<input class="checkbox-input" type="checkbox" id="checkbox-category" name="collection" value="{{link.url}}" {% if link.active %}checked{% endif %}>
+											<span class="checkbox-marker"></span>
+											<a class="filter__link{% if link.active == true %} curent{% endif %}" href="{{ collection.url }}">{{ collection.title }}<span class="checkbox-products-count">({{ products_count }})</span></a>
+										</label>
+									</li>
+								{% endif %}
+							{% endfor %}
+						</ul>
+					</div>
+				</div>
+			{% when 'filter_tag' %}
+				{% if block.settings.enable %}
+					<div class="sidebar_widget {% if settings.enable_collection_sidebar %}{% else %}col-12 col-xl-3 col-sm-6 {% endif %}{{ block.settings.title }}">
+						{% assign tags = block.settings.list_tags | split: ',' %}
+						{% if block.settings.title != blank %}
+							<dt class="block-title block-title_btn dropdown-btn">
+								<span class="category-filter">{{ block.settings.title }}</span>
+							</dt>
+						{% endif %}
+						<dd class="filters-tags">
+							<ol class="filters-tags_list">
+								{% for t in tags %}
+									{% assign tag = t | strip %}
+									{% assign tag_value = tag | link_to_add_tag: tag | split: 'href="' | last | split: '"' | first %}
+									{% if current_tags contains tag %}
+										<li class="{% if current_tags contains tag %}checked{% endif %}">
+											<label>{{ tag | link_to_remove_tag: tag }}
+												<input type="checkbox" value="{{ tag_value }}" checked/>
+											</label>
+										</li>
+									{% else %}
+										{% if collection.all_tags contains tag %}
+											<li class="{% if current_tags contains tag %}checked{% endif %}">
+												<label>{{ tag | link_to_add_tag: tag  }}
+													<input type="checkbox" value="{{ tag_value }}"/>
+												</label>
+											</li>
+										{% endif %}
+									{% endif %}
+								{% endfor %}
+							</ol>
+						</dd>
+					</div>
+				{% endif %}
+
+			{% when 'filter_price' %}
+				{% if block.settings.enable %}
+					<div class="sidebar_widget {% if settings.enable_collection_sidebar %}{% else %}col-12 col-xl-3 col-sm-6 {% endif %}{{ block.settings.title }}">
+						{% assign tags = block.settings.list_tags | split: ',' %}
+						{% if block.settings.title != blank %}
+							<dt class="block-title dropdown-btn">
+								<span class="category-filter">{{ block.settings.title }}</span>
+							</dt>
+						{% endif %}
+						<dd class="filters-price">
+							<ol>
+								{% for t in tags %}
+									{% assign tag = t | strip %}
+									{% assign tag_value = tag | link_to_add_tag: tag | split: 'href="'
+										| last | split: '"' | first %}
+									{% assign tag_remove = tag | link_to_remove_tag: tag | split: 'href="'
+										| last | split: '"' | first %}
+									{% if current_tags contains tag %}
+										<li class="filter__item {% if current_tags contains tag %}checked{% endif %}">
+											<label class="checkbox-category">
+												<a href="{{ tag_remove }}">
+												<input class="filters-price__input checkbox-input" type="checkbox" value="{{ tag_value }}" checked/>
+												<span class="checkbox-marker"></span>
+												<span class="checkbox-title">
+													{{ tag }}
+												</span>
+												</a>
+											</label>
+										</li>
+									{% else %}
+										{% if collection.all_tags contains tag %}
+											<li class="filter__item {% if current_tags contains tag %}checked{% endif %}">
+												<label class="checkbox-category" for="hidden-{{ tag_value }}">
+													<a href="{{ tag_value }}">
+													<input class="filters-price__input checkbox-input" id="hidden-{{ tag_value }}" type="checkbox" value="{{ tag_value }}"/>
+													<span class="checkbox-marker"></span>
+													<span class="checkbox-title">
+														{{ tag | link_to_add_tag: tag }}
+													</span>
+													</a>
+												</label>
+											</li>
+										{% endif %}
+									{% endif %}
+								{% endfor %}
+							</ol>
+						</dd>
+					</div>
+				{% endif %}
+
+			{% when 'category' %}
+				{% if block.settings.enable %}
+					<div class="sidebar_widget {% if settings.enable_collection_sidebar %}{% else %}col-12 col-xl-3 col-sm-6 {% endif %}{{ block.settings.title }}">
+						{% assign tags = block.settings.list_tags | split: ',' %}
+						{% if block.settings.title != blank %}
+							<dt class="block-title dropdown-btn">
+								<span class="category-filter">{{ block.settings.title }}</span>
+							</dt>
+						{% endif %}
+						<dd class="filters-category">
+							<ol>
+								{% for t in tags %}
+									{% assign tag = t | strip %}
+									{% assign tag_value = tag | link_to_add_tag: tag | split: 'href="'
+										| last | split: '"' | first %}
+									{% assign tag_remove = tag | link_to_remove_tag: tag | split: 'href="'
+										| last | split: '"' | first %}
+									{% assign products_count = 0 %}
+									{% for product in collections['all'].products %}
+										{% if product.tags contains tag %}
+											{% assign products_count = products_count | plus: 1 %}
+										{% endif %}
+									{% endfor %}
+									{% if current_tags contains tag %}
+										<li class="filter__item {% if current_tags contains tag %}checked{% endif %}">
+											<label class="checkbox-category">
+												<a href="{{ tag_remove }}">
+												<input class="filters-category__input checkbox-input" type="checkbox" value="{{ tag_value }}" checked/>
+												<span class="checkbox-marker"></span>
+													<span class="checkbox-title">
+														{{ tag | link_to_remove_tag: tag }}
+													</span>
+													<span class="checkbox-products-count">
+														({{ products_count | link_to_remove_tag: tag }})
+													</span>
+												</a>
+											</label>
+										</li>
+									{% else %}
+										{% if collection.all_tags contains tag %}
+											<li class="filter__item {% if current_tags contains tag %}checked{% endif %}">
+												<label class="checkbox-category" for="hidden-{{ tag_value }}">
+													<a href="{{ tag_value }}">
+													<input class="filters-category__input checkbox-input" id="hidden-{{ tag_value }}" type="checkbox" value="{{ tag_value }}"/>
+													<span class="checkbox-marker"></span>
+													<span class="checkbox-title">
+														{{ tag | link_to_add_tag: tag }}
+													</span>
+													<span class="checkbox-products-count">
+														({{ products_count | link_to_add_tag: tag }})
+													</span>
+													</a>
+												</label>
+											</li>
+										{% endif %}
+									{% endif %}
+								{% endfor %}
+							</ol>
+						</dd>
+					</div>
+				{% endif %}
+
+			{% when 'custom_html' %}
+				<div class="sidebar_widget sidebar_widget__html">{{ block.settings.html_code }}</div>
+
+		{% endcase %}
+	{% endfor %}
+</div>
+
+{% schema %}
+{
+	"name": "Filter Sidebar",
+	"class": "page_sidebar_left",
+	"max_blocks": 10,
+	"settings": [
+		{
+			"type": "header",
+			"content": "Sidebar widgets"
+		},
+		{
+			"type": "checkbox",
+			"id": "show_sidebar_title",
+			"label": {
+				"en": "Show sidebar title in mobile version"
+			},
+			"default": true
+		}
+	],
+	"blocks": [
+		{
+			"type": "widget_collection",
+			"name": "listCollection",
+			"settings": [
+				{
+					"type": "text",
+					"id": "title",
+					"label": "widget_collection",
+					"default": "List of collections"
+				}
+			]
+		},
+		{
+			"type": "filter_tag",
+			"name": "Filter Tags",
+			"settings": [
+			{
+					"type": "checkbox",
+					"id": "enable",
+					"label": "Enable",
+					"default": true
+				},
+				{
+					"type": "text",
+					"id": "title",
+					"label": "Filter Title"
+				},
+				{
+					"type": "textarea",
+					"id": "list_tags",
+					"label": "List Tags",
+					"info": "Separate by a comma, i.e \"S, M, L\"."
+				}
+			]
+		},
+
+		{
+			"type": "custom_html",
+			"name": "HTML code",
+			"settings": [
+				{
+					"type": "html",
+					"id": "html_code",
+					"label": "Custom HTML",
+					"default": "<div><p>You HTML content</p></div>"
+				}
+			]
+		},
+
+		{
+			"type": "filter_price",
+			"name": "Filter Price",
+			"settings": [
+				{
+					"type": "checkbox",
+					"id": "enable",
+					"label": "Enable",
+					"default": true
+				},
+				{
+					"type": "text",
+					"id": "title",
+					"label": "Filter Title"
+				},
+				{
+					"type": "textarea",
+					"id": "list_tags",
+					"label": "List Price",
+					"info": "Separate by a comma, i.e \"Under 25 UAH, 25-30 UAH, 35-40 UAH, Above  40 UAH\"."
+				}
+			]
+		},
+		{
+			"type": "category",
+			"name": "Category",
+			"settings": [
+				{
+					"type": "checkbox",
+					"id": "enable",
+					"label": "Enable",
+					"default": true
+				},
+				{
+					"type": "text",
+					"id": "title",
+					"label": "Filter Title"
+				},
+				{
+					"type": "textarea",
+					"id": "list_tags",
+					"label": "List Category",
+					"info": "Separate by a comma, i.e \"Flowers, Salads, Seeds, Species, Veggies\"."
+				}
+			]
+		}
+	]
+}
+{% endschema %}

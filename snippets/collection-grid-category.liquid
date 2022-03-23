@@ -1,0 +1,32 @@
+{% if collection.image %}
+  {%- assign collection_image = collection.image -%}
+{% elsif collection.products.first and collection.products.first.media != empty %}
+  {%- assign collection_image = collection.products.first.featured_media.preview_image -%}
+{% else %}
+  {% assign collection_image = blank %}
+{% endif %}
+
+<div class="collection-category-item">
+  <a href="{% if collection.products == empty %}#{% else %}{{ collection.url }}{% endif %}" class="collection-category__link">
+    {% unless collection_image == blank %}
+      <img class="collection-category__image" src="{{ collection_image | collection_img_url: 'master' }}" alt="{{ collection.image.alt }}">
+    {% else %}
+      {% if collection == empty %}
+        <div class="collection-grid-item__overlay">
+          {% capture current %}{% cycle 1, 2, 3 %}{% endcapture %}
+          {{ 'collection-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {% else %}
+        <div class="collection-grid-item__overlay" style="background-image: url('{{ collection_image | img_url: '1024x1024' }}')"></div>
+      {% endif %}
+    {% endunless %}
+
+      <p class="collection-category__title">
+        {% if collection.title == blank %}
+          {{ 'homepage.onboarding.collection_title' | t }}
+        {% else %}
+          {{ collection.title }}
+        {% endif %}
+      </p>
+  </a>
+</div>
